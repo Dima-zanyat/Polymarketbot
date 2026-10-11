@@ -1,5 +1,8 @@
+
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+
+import httpx
 
 from app.core.logging import setup_logging, get_logger
 from app.config import settings
@@ -13,7 +16,12 @@ async def lifespan(app: FastAPI):
     """Управление ресурсами на старте."""
     setup_logging()
     logger.info("Запуск %s , %s", settings.app_name, settings.envrioment)
-    yield
+    logger.info("Тут будут каки-то метрики по боту")
+    app.state.client = httpx.AsyncClient()
+    try:
+        yield
+    finally:
+        await app.state.client.aclose()
     logger.info("Приложение остановлено.")
 
 
